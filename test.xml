@@ -1,0 +1,2 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body><checkVatResponse xmlns="urn:ec.europa.eu:taxud:vies:services:checkVat:types"><countryCode>AT</countryCode><vatNumber>U71738505</vatNumber><requestDate>2021-12-10+01:00</requestDate><valid>true</valid><name>AirG distribution GmbH</name><address>Bachlechnerstraße 21
+AT-6020 Innsbruck</address></checkVatResponse></soap:Body></soap:Envelope>

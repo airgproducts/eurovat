@@ -10,7 +10,7 @@ from eurovat.cn_code import CnCode
 @dataclasses.dataclass
 class VatRate:
     reduced: bool
-    rate: decimal
+    rate: decimal.Decimal
 
     cn_codes: List[str]
     cpa_codes: List[str]
@@ -51,9 +51,9 @@ class VatRules:
     country: EUState
     vat_rates: List[VatRate]
 
-    _vat_rates_standard: List[VatRate]=None
-    _vat_rates_reduced_cn: Dict[str, VatRate] = None
-    _vat_rates_reduced_cpa: Dict[str, VatRate] = None
+    _vat_rates_standard: List[VatRate] = dataclasses.field(default_factory=lambda: [])
+    _vat_rates_reduced_cn: Dict[str, VatRate] = dataclasses.field(default_factory=lambda: {})
+    _vat_rates_reduced_cpa: Dict[str, VatRate] = dataclasses.field(default_factory=lambda: {})
 
     def __post_init__(self):
         self._index()

@@ -1,7 +1,7 @@
 import decimal
 import unittest
 
-from eurovat import VatRuleRegistry
+from eurovat import VatRuleRegistry, get_vat_rate
 
 
 class VatRateTest(unittest.TestCase):
@@ -13,6 +13,9 @@ class VatRateTest(unittest.TestCase):
         second = decimal.Decimal(required_rate)
 
         self.assertEqual(first, second)
+    
+    def test_rate_simple_at_saccharose(self):
+        self.assertRate(get_vat_rate("AT", "18061015"), "10")
     
     def test_rate_de(self):
         self.assertRate(self.registry.get_vat_rate("DE"), "19")

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<env:Envelope xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"
+ env:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+  <env:Body xmlns:vies="urn:ec.europa.eu:taxud:vies:services:checkVat:types">
+    <vies:checkVat>
+      <vies:countryCode>{country_code}</vies:countryCode>
+      <vies:vatNumber>{vat_code}</vies:vatNumber>
+    </vies:checkVat>
+  </env:Body>
+</env:Envelope>

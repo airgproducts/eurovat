@@ -12,8 +12,13 @@ class CnCode:
         
         self.code = code + "0" * (self.code_length-len(code))
     
-    def __eq__(self, o: "CnCode"):
-        return self.code == o.code
+    def __eq__(self, o: object):
+        if isinstance(o, CnCode):
+            return self.code == o.code
+        elif isinstance(o, str):
+            return self.code == o
+        
+        return False
     
     def __repr__(self):
         return f"<CnCode: {self.code}>"

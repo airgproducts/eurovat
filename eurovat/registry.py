@@ -1,40 +1,28 @@
 import json
 import os
+from typing import Dict
 
 from eurovat.states import states, EUState
 from eurovat.rate import VatRules, VatRate
 from eurovat.tedb import get_rates
+from eurovat.data import vat_rules_file
 
 class VatRuleRegistry:
-    cache_dir = os.path.dirname(os.path.abspath(__file__))
-    cache_filename = "data/vat_rules.json"
+    cache_filename = vat_rules_file
+    cache_dir = ""
 
     custom_rules_filename = None
 
-    vat_rules = {}
+    vat_rules: Dict[str, VatRules] = {}
 
-    def __init__(self, cachefile=None):
-        filename = self._get_filename(cachefile)
-
-        with open(filename) as infile:
-            dct = json.load(infile)
-        
-        for key, _rules in dct.items():
-            country = EUState.get(key)
-            rules = [VatRate.fromdict(rule) for rule in _rules]
-            self.vat_rules[key] = VatRules(country, rules)
+    def __init__(self):
+        self.load()
     
-    def _get_filename(self, filename=None, update_filename=False):
-        if filename is None:
-            filename = self.cache_filename
-        elif update_filename:
-            self.cache_filename = filename
+    def _get_filename(self):
+        filename = self.cache_filename
 
         if not os.path.isabs(filename):
             filename = os.path.join(self.cache_dir, filename)
-        else:
-            if update_filename:
-                self.cache_dir = None
         
         return filename
     
@@ -52,17 +40,33 @@ class VatRuleRegistry:
             rule.country.iso_code: rule for rule in   
             get_rates(countries)
         }
+
+    def load(self):
+        dct = self.load_data()
+        for key, _rules in dct.items():
+            country = EUState.get(key)
+            rules = [VatRate.fromdict(rule) for rule in _rules]
+            self.vat_rules[key] = VatRules(country, rules)
     
-    def store(self, filename=None) -> None:
-        full_filename = self._get_filename(filename)
+    def load_data(self) -> Dict[str, object]:
+        filename = self._get_filename()
+
+        with open(filename) as infile:
+            return json.load(infile)
+    
+    def store(self) -> None:
+        full_filename = self._get_filename()
 
         with open(full_filename, "w") as outfile:
             json.dump({
                 rule.country.iso_code: rule.as_list() for rule in self.vat_rules.values()
                 }, outfile, indent=2)
 
+    def update(self):
+        self.fetch()
+        self.store()
+
 
 if __name__ == "__main__":
     registry = VatRuleRegistry()
-    registry.fetch()
-    registry.store()
+    registry.update()

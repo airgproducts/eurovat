@@ -37,7 +37,7 @@ def get_rates(countries: List[Union[str, EUState]], date_from: Optional[datetime
     
     data = request.json()
 
-    rates = {}
+    rates: Dict[str, List[VatRate]] = {}
     
     for row in data:
         assert row["type"] in ("STANDARD", "REDUCED")
@@ -73,10 +73,3 @@ def get_rates(countries: List[Union[str, EUState]], date_from: Optional[datetime
         
         for country_name, rate_lst in rates.items()
     ]
-
-
-    
-if __name__ == "__main__":
-    rates = get_rates(["DE"])
-    with open("./rates.json", "w") as outfile:
-        json.dump(rates["DE"].as_list(), outfile, indent=4)
