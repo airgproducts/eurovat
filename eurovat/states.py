@@ -4,19 +4,27 @@ from typing import Dict, List, Tuple
 import pycountry
 
 
-@dataclass
 class EUState:
     iso_code: str
     name: str
     msa_id: int
 
 
-    states_by_iso: Dict[str, EUState] = {}
-    states_by_name: Dict[str, EUState] = {}
+    states_by_iso: Dict[str, "EUState"] = {}
+    states_by_name: Dict[str, "EUState"] = {}
 
-    def __post_init__(self):
-        self.states_by_iso[self.iso_code.upper()] = self
-        self.states_by_name[self.name.upper()] = self
+    def __init__(self, iso_code: str, name: str, msa_id: int):
+        self.iso_code = iso_code.upper()
+        self.name = name
+        self.msa_id = msa_id
+    
+    @classmethod
+    def register(cls, iso_code: str, name: str, msa_id: int) -> "EUState":
+        instance = cls(iso_code, name, msa_id)
+        cls.states_by_iso[instance.iso_code] = instance
+        cls.states_by_name[instance.name.upper()] = instance
+
+        return instance
     
     @classmethod
     def get(cls, query: str):
@@ -69,4 +77,4 @@ states = []
 
 for iso_code, msa_id in state_codes:
     name = pycountry.countries.lookup(iso_code).name
-    states.append(EUState(iso_code, name, msa_id))
+    states.append(EUState.register(iso_code, name, msa_id))
