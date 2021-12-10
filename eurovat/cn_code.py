@@ -31,13 +31,11 @@ class CnCode:
             self._get_parent_code(2),
         ]
 
-        codes = [self]
+        codes = []
 
         for code in _codes:
-            if code not in codes:
+            if code not in codes and code != self:
                 codes.append(code)
         
-        print(codes)
-            
         return codes
 
