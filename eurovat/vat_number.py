@@ -5,8 +5,7 @@ import time
 from typing import Optional
 
 import requests
-from lxml import etree
-
+from xml.etree import ElementTree
 from eurovat.data import vies_template
 
 
@@ -39,8 +38,7 @@ class ViesResult:
     
     def parse(self):
 
-        tree = etree.ElementTree(etree.fromstring(self.result_string))
-        root = tree.getroot()
+        tree = ElementTree.fromstring(self.result_string)
 
         response = tree.find('./' + self._NS_SOAP + 'Body/' + self._NS_VIES + 'checkVatResponse')
 
