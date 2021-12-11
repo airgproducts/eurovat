@@ -63,7 +63,7 @@ registry.update()
 ## Custom cache
 
 You can use a custom cache too.
-Find an example in `eurovat.cache.django`
+Find an example in [eurovat.cache.django](eurovat/cache/django.py)
 
 Here is how to use it:
 
@@ -75,7 +75,7 @@ from eurovat.cache.django import DjangoCache
 
 
 class Registry(eurovat.VatRuleRegistry):
-    cache_factory = lambda: DjangoCache("eurovat_rates")
+    cache = DjangoCache("eurovat_rates")
     date_begin = datetime.datetime(1970, 1, 1)
 
 
