@@ -2,7 +2,7 @@ from typing import Dict
 
 class Cache:
     def get_mtime(self) -> float:
-        return cache.get(self._cache_mtime_key)
+        raise NotImplementedError()
 
     def load(self) -> Dict[str, object]:
         raise NotImplementedError()

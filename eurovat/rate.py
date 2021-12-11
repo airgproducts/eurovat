@@ -18,7 +18,7 @@ class VatRate:
 
     category: str=""
     description: str=""
-    situation_on: Optional[int]=None
+    situation_on: Optional[float]=None
 
     def __post_init__(self):
         for i, code in enumerate(self.cn_codes):
@@ -59,8 +59,8 @@ class VatRules:
     vat_rates: List[VatRate]
 
     _vat_rates_standard: List[VatRate] = dataclasses.field(default_factory=lambda: [])
-    _vat_rates_reduced_cn: Dict[str, VatRate] = dataclasses.field(default_factory=lambda: {})
-    _vat_rates_reduced_cpa: Dict[str, VatRate] = dataclasses.field(default_factory=lambda: {})
+    _vat_rates_reduced_cn: Dict[str, List[VatRate]] = dataclasses.field(default_factory=lambda: {})
+    _vat_rates_reduced_cpa: Dict[str, List[VatRate]] = dataclasses.field(default_factory=lambda: {})
 
     def __post_init__(self):
         self._index()
@@ -93,7 +93,7 @@ class VatRules:
 
 
     def get_vat_rate(self, cn_code=None, cpa_code=None, date: Optional[datetime.datetime]=None) -> VatRate:
-        rates = []
+        rates: List[VatRate] = []
 
         if cn_code is not None:
             if isinstance(cn_code, str):
@@ -120,7 +120,7 @@ class VatRules:
             timestamp = date.timestamp()
 
             for rate in rates:
-                if rate.situation_on <= timestamp:
+                if rate.situation_on is not None and rate.situation_on <= timestamp:
                     return rate
             
             return self._vat_rates_standard[0]
