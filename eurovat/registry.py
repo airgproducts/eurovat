@@ -1,19 +1,23 @@
 import json
 import os
-from typing import Dict
+from typing import Dict, Optional
+import datetime
 
 from eurovat.states import states, EUState
 from eurovat.rate import VatRules, VatRate
 from eurovat.tedb import get_rates
 from eurovat.data import vat_rules_file
+from eurovat.cache import Cache, FilesystemCache
+from eurovat.cache.filesystem import FilesystemCache
 
 class VatRuleRegistry:
-    cache_filename = vat_rules_file
-    cache_dir = ""
-
-    custom_rules_filename = None
-
+    cache: Cache = FilesystemCache(vat_rules_file)
+    date_begin = None
     vat_rules: Dict[str, VatRules] = {}
+
+    cache_last_update: float=0
+    cache_auto_update: bool=True
+    
 
     def __init__(self):
         self.load()
@@ -26,11 +30,15 @@ class VatRuleRegistry:
         
         return filename
     
-    def get_vat_rate(self, to_country, cn_code=None):
+    def get_vat_rate(self, to_country, cn_code=None, date: Optional[datetime.datetime]=None):
+        if self.cache_auto_update:
+            if self.cache_last_update < self.cache.get_mtime():
+                self.load()
+
         if isinstance(to_country, EUState):
             to_country = to_country.iso_code
 
-        return self.vat_rules[to_country.upper()].get_vat_rate(cn_code)
+        return self.vat_rules[to_country.upper()].get_vat_rate(cn_code, date=date)
 
     def fetch(self, countries=None):
         if countries is None:
@@ -38,29 +46,21 @@ class VatRuleRegistry:
         
         self.vat_rules = {
             rule.country.iso_code: rule for rule in   
-            get_rates(countries)
+            get_rates(countries, self.date_begin)
         }
 
     def load(self):
-        dct = self.load_data()
+        self.cache_last_update = self.cache.get_mtime()
+        dct = self.cache.load()
         for key, _rules in dct.items():
             country = EUState.get(key)
             rules = [VatRate.fromdict(rule) for rule in _rules]
             self.vat_rules[key] = VatRules(country, rules)
     
-    def load_data(self) -> Dict[str, object]:
-        filename = self._get_filename()
-
-        with open(filename) as infile:
-            return json.load(infile)
-    
     def store(self) -> None:
-        full_filename = self._get_filename()
-
-        with open(full_filename, "w") as outfile:
-            json.dump({
-                rule.country.iso_code: rule.as_list() for rule in self.vat_rules.values()
-                }, outfile, indent=2)
+        self.cache.save({
+            rule.country.iso_code: rule.as_list() for rule in self.vat_rules.values()
+        })
 
     def update(self):
         self.fetch()

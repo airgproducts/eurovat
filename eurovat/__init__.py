@@ -1,4 +1,5 @@
 from eurovat.registry import VatRuleRegistry
+from eurovat.cache import Cache, FilesystemCache
 from eurovat.rate import VatRate
 from eurovat.states import states
 from eurovat.cn_code import CnCode

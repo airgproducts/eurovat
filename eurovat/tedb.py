@@ -56,17 +56,29 @@ def get_rates(countries: List[Union[str, EUState]], date_from: Optional[datetime
 
         ]
 
+        start_date = row["situationOn"]
+
         rates.setdefault(country_code, [])
         rates[country_code].append(
             VatRate(
                 reduced=reduced,
                 rate = rate,
+                situation_on=start_date/1000,
                 cn_codes = cn_codes,
                 cpa_codes = cpa_codes,
                 category = row["category"],
                 description = row["comments"] or ""
             )
         )
+    
+    # WORKAROUND for missing rule:
+    rates["DE"].append(VatRate(
+        reduced=False,
+        rate=decimal.Decimal("16"),
+        cn_codes=[],
+        cpa_codes=[],
+        situation_on=datetime.datetime(2020, 7, 1).timestamp()
+    ))
     
     return [
         VatRules(EUState.get(country_name), rate_lst)
