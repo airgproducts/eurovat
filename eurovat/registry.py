@@ -50,8 +50,10 @@ class VatRuleRegistry:
         }
 
     def load(self):
-        self.cache_last_update = self.cache.get_mtime()
         dct = self.cache.load()
+        if dct is None:
+            return
+        self.cache_last_update = self.cache.get_mtime()
         for key, _rules in dct.items():
             country = EUState.get(key)
             rules = [VatRate.fromdict(rule) for rule in _rules]
