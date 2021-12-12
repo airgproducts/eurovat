@@ -1,5 +1,6 @@
 import eurovat
 import datetime
+import time
 from typing import Dict
 
 from django.core.cache import cache
