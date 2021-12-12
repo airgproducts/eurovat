@@ -21,7 +21,7 @@ class DjangoCache:
         return f"{self.cache_prefix}_data"
 
     def get_mtime(self) -> float:
-        return cache.get(self._cache_mtime_key)
+        return cache.get(self._cache_mtime_key, 0)
     
     def load(self) -> Dict[str, object]:
         data = cache.get(self._cache_data_key)
