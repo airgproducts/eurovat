@@ -82,9 +82,9 @@ def get_rates(countries: List[Union[str, EUState]], date_from: Optional[datetime
 
     # canary-islands-reduced rate
     spanish_standard_rates = filter(lambda el: el.reduced==False, rates["ES"])
-    for rate in spanish_standard_rates:
-        if rate.description:
-            rate.reduced = True
+    for rate_es in spanish_standard_rates:
+        if rate_es.description:
+            rate_es.reduced = True
     
     return [
         VatRules(EUState.get(country_name), rate_lst)
