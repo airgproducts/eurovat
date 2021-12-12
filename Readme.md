@@ -16,9 +16,29 @@ A python library to get the vat right in the EU.
 
 * fetch newest rates daily with gh-actions and submit automated PR's
 
-## Historic Data
+## Installation
 
-If you need historic data, you should fetch the database with the required starting date:
+just use pip:
+
+```
+pip install eurovat
+```
+
+## Vat rates
+
+you can query the vat-registry with the following arguments:
+
+* country
+    - iso-code or `eurovat.EUState` object
+* cn-code
+    - optional
+    - get reduced rates for certain cn-codes
+* cpa-code
+    - optional
+    - get reduced rates for certain cpa-codes
+* date
+    - optional
+    - get temporary reduced rates for the given date
 
 ``` python
 import eurovat
@@ -42,7 +62,17 @@ rate2 = registry.get_vat_rate("AT", "49020000", date=datetime.datetime(year=2016
 # rate2 = 20
 ```
 
-## Filesystem cache
+## Update the registry
+
+keep the registry up-to-date from time to time:
+
+``` python
+registry.update()
+```
+
+this will require write access to the package-file `vat_rules.json`. There are alternative storage locations available:
+
+### Filesystem cache
 
 when writing to package data is not an option, you can use a custom cache-file:
 
@@ -60,12 +90,9 @@ registry.update()
 
 ```
 
-## Custom cache
+### Django cache
 
-You can use a custom cache too.
-Find an example in [eurovat.cache.django](eurovat/cache/django.py)
-
-Here is how to use it:
+This will use Django's cache backend to store vat-rules
 
 ``` python
 import eurovat
@@ -83,3 +110,9 @@ registry = Registry()
 registry.update()
 
 ```
+
+### Custom cache
+
+
+You can use a custom cache too.
+Find an example in [eurovat.cache.django](eurovat/cache/django.py)

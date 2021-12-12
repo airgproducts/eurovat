@@ -31,6 +31,10 @@ class VatRateTest(unittest.TestCase):
 
     def test_rate_de_temporary_reduction(self):
         self.assertRate(self.registry.get_vat_rate("DE", date=datetime.datetime(year=2020, month=10, day=5)), "16")
+
+    def test_rate_ie_temporary_reduction(self):
+        self.assertRate(self.registry.get_vat_rate("IE", date=datetime.datetime(year=2020, month=10, day=5)), "21")
+        self.assertRate(self.registry.get_vat_rate("IE"), "23")
     
     def test_rate_de_reduced_fruits(self):
         self.assertRate(self.registry.get_vat_rate("DE", "08050000"), "7")
