@@ -1,9 +1,14 @@
-import decimal
-import unittest
 import datetime
+import decimal
+import logging
+import os
+import unittest
 
 from eurovat import VatRuleRegistry, get_vat_rate
+from eurovat.states import states
 
+logger = logging.getLogger(__name__)
+dirname = os.path.dirname(os.path.abspath(__file__))
 
 class VatRateTest(unittest.TestCase):
     registry: VatRuleRegistry

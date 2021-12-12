@@ -5970,7 +5970,7 @@
       "situation_on": 1625090400.0
     },
     {
-      "reduced": false,
+      "reduced": true,
       "rate": "7",
       "cn_codes": [],
       "cpa_codes": [],
