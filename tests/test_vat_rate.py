@@ -61,7 +61,6 @@ class VatRateTest(unittest.TestCase):
         self.assertRate(self.registry.get_vat_rate("DE", "18061015"), "7")
 
     def test_rate_at_temporary_reduced_newspapers(self):
-        breakpoint()
         self.assertRate(
             self.registry.get_vat_rate(
                 "AT", "49020000", date=datetime.datetime(year=2016, month=10, day=5)
