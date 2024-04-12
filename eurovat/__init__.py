@@ -7,4 +7,4 @@ from eurovat.vat_number import VatNumber
 
 from eurovat.functions import get_vat_rate
 
-__version__ = "0.9.5"
+__version__ = "0.10.1"

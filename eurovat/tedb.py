@@ -1,16 +1,21 @@
 from typing import Union, Optional, List, Dict
 import requests
 import datetime
+import time
 import decimal
-import json
 
-from eurovat.states import EUState, states
+from eurovat.states import EUState
 from eurovat.rate import VatRate, VatRules
 
-query_url = "https://ec.europa.eu/taxation_customs/tedb/vatSearchResult.json"
+query_url = "https://ec.europa.eu/taxation_customs/tedb/rest-api/vatSearch"
 dateformat = "%Y/%m/%d"
 
-def get_rates(countries: List[Union[str, EUState]], date_from: Optional[datetime.date]=None, date_to: Optional[datetime.date]=None) -> List[VatRules]:
+
+def get_rates(
+    countries: List[Union[str, EUState]],
+    date_from: Optional[datetime.date] = None,
+    date_to: Optional[datetime.date] = None,
+) -> List[VatRules]:
     countries_lst = []
 
     for country in countries:
@@ -29,65 +34,71 @@ def get_rates(countries: List[Union[str, EUState]], date_from: Optional[datetime
 
     request = requests.post(
         url=query_url,
-        params={
-        "selectedMemberStates": countries_lst,
-        "dateFrom": date_from_str.encode(),
-        "dateTo": date_to.strftime(dateformat).encode()
-        })
-    
+        json={
+            "searchForm": {
+                "selectedMemberStates": countries_lst,
+                "dateFrom": date_from_str.encode(),
+                "dateTo": date_to.strftime(dateformat).encode(),
+            }
+        },
+    )
+
     data = request.json()
 
     rates: Dict[str, List[VatRate]] = {}
-    
-    for row in data:
+
+    for row in data["result"]:
         assert row["type"] in ("STANDARD", "REDUCED")
-        country_code = row["memberState"]["defaultCountryCode"]
+        country_code = row["isoCode"]
         reduced = row["type"] != "STANDARD"
-        rate = decimal.Decimal(row["rate"]["value"])
+        for rate in row["rates"]:
+            rate_value = decimal.Decimal(rate["value"])
 
-        cn_codes = [
-            code["key"]["code"]
-            for code in row["cnCodes"]
-        ]
+            cn_codes = []
+            if rate["cnCodes"]:
+                cn_codes = [code.get("key", {}).get("code") for code in rate["cnCodes"]]
 
-        cpa_codes = [
-            code["key"]["code"]
-            for code in row["cpaCodes"]
+            cpa_codes = []
+            if rate["cpaCodes"]:
+                cpa_codes = [
+                    code.get("key", {}).get("code") for code in rate["cpaCodes"]
+                ]
 
-        ]
-
-        start_date = row["situationOn"]
-
-        rates.setdefault(country_code, [])
-        rates[country_code].append(
-            VatRate(
-                reduced=reduced,
-                rate = rate,
-                situation_on=start_date/1000,
-                cn_codes = cn_codes,
-                cpa_codes = cpa_codes,
-                category = row["category"],
-                description = row["comments"] or ""
+            start_date = time.mktime(
+                datetime.datetime.strptime(rate["situationOn"], "%Y/%m/%d").timetuple()
             )
-        )
-    
+
+            rates.setdefault(country_code, [])
+            rates[country_code].append(
+                VatRate(
+                    reduced=reduced,
+                    rate=rate_value,
+                    situation_on=start_date,
+                    cn_codes=cn_codes,
+                    cpa_codes=cpa_codes,
+                    category=rate["category"],
+                    description=rate["comments"] or "",
+                )
+            )
+
     # WORKAROUND for missing rule:
-    rates["DE"].append(VatRate(
-        reduced=False,
-        rate=decimal.Decimal("16"),
-        cn_codes=[],
-        cpa_codes=[],
-        situation_on=datetime.datetime(2020, 7, 1).timestamp()
-    ))
+    rates["DE"].append(
+        VatRate(
+            reduced=False,
+            rate=decimal.Decimal("16"),
+            cn_codes=[],
+            cpa_codes=[],
+            situation_on=datetime.datetime(2020, 7, 1).timestamp(),
+        )
+    )
 
     # canary-islands-reduced rate
-    spanish_standard_rates = filter(lambda el: el.reduced==False, rates["ES"])
+    spanish_standard_rates = filter(lambda el: not el.reduced, rates["ES"])
     for rate_es in spanish_standard_rates:
         if rate_es.description:
             rate_es.reduced = True
-    
+
     return [
         VatRules(EUState.get(country_name), rate_lst)
-        
         for country_name, rate_lst in rates.items()
     ]
