@@ -41,7 +41,7 @@ class VatRuleRegistry:
 
         return self.vat_rules[to_country.upper()].get_vat_rate(cn_code, date=date)
 
-    def fetch(self, countries=None):
+    def fetch(self, countries: list[str | EUState] | None=None):
         if countries is None:
             countries = states
 

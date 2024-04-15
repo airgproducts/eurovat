@@ -28,7 +28,7 @@ def get_rates(
         date_to = datetime.date.today()
 
     if date_from is None:
-        date_from_str = ""
+        date_from_str = None
     else:
         date_from_str = date_from.strftime(dateformat)
 
@@ -37,11 +37,13 @@ def get_rates(
         json={
             "searchForm": {
                 "selectedMemberStates": countries_lst,
-                "dateFrom": date_from_str.encode(),
-                "dateTo": date_to.strftime(dateformat).encode(),
+                "dateFrom": date_from_str,
+                "dateTo": date_to.strftime(dateformat),
             }
         },
     )
+
+    assert request.status_code == 200
 
     data = request.json()
 
@@ -56,12 +58,12 @@ def get_rates(
 
             cn_codes = []
             if rate["cnCodes"]:
-                cn_codes = [code.get("key", {}).get("code") for code in rate["cnCodes"]]
+                cn_codes = [code["code"] for code in rate["cnCodes"]]
 
             cpa_codes = []
             if rate["cpaCodes"]:
                 cpa_codes = [
-                    code.get("key", {}).get("code") for code in rate["cpaCodes"]
+                    code.get("code", None) for code in rate["cpaCodes"]
                 ]
 
             start_date = time.mktime(

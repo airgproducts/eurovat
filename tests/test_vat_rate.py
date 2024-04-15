@@ -17,16 +17,14 @@ class VatRateTest(unittest.TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.registry = VatRuleRegistry()
+        cls.registry.date_begin = datetime.datetime(1990, 11, 21)
+        cls.registry.fetch()
 
     def assertRate(self, vat_rate, required_rate: str):
         first = vat_rate.rate
         second = decimal.Decimal(required_rate)
 
         self.assertEqual(first, second)
-
-    def test_fetch_rates(self):
-        self.registry.date_begin = datetime.datetime(1990, 11, 21)
-        self.registry.fetch()
 
     def test_rate_simple_at_saccharose(self):
         self.assertRate(get_vat_rate("AT", "18061015"), "10")
