@@ -73,7 +73,7 @@ state_codes: List[Tuple[str, int]] = [
     ("SK", 28)
 ]
 
-states: list[EUState] = []
+states: List[EUState] = []
 
 for iso_code, msa_id in state_codes:
     name = pycountry.countries.lookup(iso_code).name
