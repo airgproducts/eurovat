@@ -1,5 +1,4 @@
 from typing import List, Dict, Optional
-import enum
 import decimal
 import dataclasses
 import datetime
@@ -16,33 +15,33 @@ class VatRate:
     cn_codes: List[str]
     cpa_codes: List[str]
 
-    category: str=""
-    description: str=""
-    situation_on: Optional[float]=None
+    category: str = ""
+    description: str = ""
+    situation_on: Optional[float] = None
 
     def __post_init__(self):
         for i, code in enumerate(self.cn_codes):
-            if len(code) != 8:
+            if code and len(code) != 8:
                 code = code.replace(" ", "")
-                code += "0" * (8-len(code))
+                code += "0" * (8 - len(code))
 
                 self.cn_codes[i] = code
-    
+
     @property
     def start_date(self):
         if self.situation_on is not None:
             return datetime.datetime.fromtimestamp(self.situation_on)
-    
+
     @property
     def rate_multiplier(self):
         return self.rate / 100
-    
+
     def asdict(self):
         dct = dataclasses.asdict(self)
         dct["rate"] = str(self.rate)
 
         return dct
-    
+
     @classmethod
     def fromdict(cls, dct):
         data = dct.copy()
@@ -51,16 +50,18 @@ class VatRate:
         return cls(**data)
 
 
-
-
 @dataclasses.dataclass
 class VatRules:
     country: EUState
     vat_rates: List[VatRate]
 
     _vat_rates_standard: List[VatRate] = dataclasses.field(default_factory=lambda: [])
-    _vat_rates_reduced_cn: Dict[str, List[VatRate]] = dataclasses.field(default_factory=lambda: {})
-    _vat_rates_reduced_cpa: Dict[str, List[VatRate]] = dataclasses.field(default_factory=lambda: {})
+    _vat_rates_reduced_cn: Dict[str, List[VatRate]] = dataclasses.field(
+        default_factory=lambda: {}
+    )
+    _vat_rates_reduced_cpa: Dict[str, List[VatRate]] = dataclasses.field(
+        default_factory=lambda: {}
+    )
 
     def __post_init__(self):
         self._index()
@@ -79,20 +80,21 @@ class VatRules:
                 for code in vat_rate.cpa_codes:
                     self._vat_rates_reduced_cpa.setdefault(code, [])
                     self._vat_rates_reduced_cpa[code].append(vat_rate)
-            
+
             else:
                 self._vat_rates_standard.append(vat_rate)
-        
+
         for lst in self._vat_rates_reduced_cn.values():
             lst.sort(key=lambda el: -el.situation_on)
 
         for lst in self._vat_rates_reduced_cpa.values():
             lst.sort(key=lambda el: -el.situation_on)
-        
+
         self._vat_rates_standard.sort(key=lambda el: -el.situation_on)
 
-
-    def get_vat_rate(self, cn_code=None, cpa_code=None, date: Optional[datetime.datetime]=None) -> VatRate:
+    def get_vat_rate(
+        self, cn_code=None, cpa_code=None, date: Optional[datetime.datetime] = None
+    ) -> VatRate:
         rates: List[VatRate] = []
 
         if cn_code is not None:
@@ -112,7 +114,7 @@ class VatRules:
                 rates += self._vat_rates_reduced_cpa[cpa_code]
             except KeyError:
                 pass
-        
+
         rates += self._vat_rates_standard
 
         # filter by date
@@ -122,12 +124,10 @@ class VatRules:
             for rate in rates:
                 if rate.situation_on is not None and rate.situation_on <= timestamp:
                     return rate
-            
+
             return self._vat_rates_standard[0]
-        
+
         return rates[0]
-    
+
     def as_list(self):
-        return [
-            obj.asdict() for obj in self.vat_rates
-        ]
+        return [obj.asdict() for obj in self.vat_rates]

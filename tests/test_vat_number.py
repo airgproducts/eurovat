@@ -12,7 +12,7 @@ class VatNumberTest(unittest.TestCase):
         self.assertEqual(result.country_code, "AT")
         self.assertEqual(result.name, "AirG distribution GmbH")
         self.assertEqual(result.number, "U71738505")
-        self.assertEqual(result.address, "Bachlechnerstraße 21\nAT-6020 Innsbruck")
+        self.assertEqual(result.address, "Fürstenweg 25\nAT-6020 Innsbruck")
     
     def test_invalid_vatnr(self):
         vat_nr = VatNumber("ATU71738504")
