@@ -28,4 +28,4 @@ jobs:
           mypy --install-types --non-interactive eurovat
       - name: test
         run: |
-          python setup.py test
+          python -m unittest
