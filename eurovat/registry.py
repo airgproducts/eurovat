@@ -1,5 +1,5 @@
 import os
-from typing import Dict, Optional
+from typing import Dict, Optional, Sequence
 import datetime
 
 from eurovat.states import states, EUState
@@ -41,13 +41,15 @@ class VatRuleRegistry:
 
         return self.vat_rules[to_country.upper()].get_vat_rate(cn_code, date=date)
 
-    def fetch(self, countries: list[str | EUState] | None=None):
+    def fetch(self, countries: Sequence[str | EUState] | None=None):
         if countries is None:
-            countries = states
+            final_countries: Sequence[str | EUState] = states
+        else:
+            final_countries = countries
 
         self.vat_rules = {
             rule.country.iso_code: rule
-            for rule in get_rates(countries, self.date_begin)
+            for rule in get_rates(final_countries, self.date_begin)
         }
 
     def load(self):

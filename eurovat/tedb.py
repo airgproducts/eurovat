@@ -1,4 +1,4 @@
-from typing import Union, Optional, List, Dict
+from typing import Sequence, Union, Optional, List, Dict
 import requests
 import datetime
 import time
@@ -12,7 +12,7 @@ dateformat = "%Y/%m/%d"
 
 
 def get_rates(
-    countries: List[Union[str, EUState]],
+    countries: Sequence[Union[str, EUState]],
     date_from: Optional[datetime.date] = None,
     date_to: Optional[datetime.date] = None,
 ) -> List[VatRules]:
